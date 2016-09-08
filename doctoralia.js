@@ -1,11 +1,14 @@
 var util = require('util');
 var fs = require('fs');
-var casper = require('casper').create({verbose: true,logLevel: "info", clientScripts: ['jquery.js']});
+var casper = require('casper').create({verbose: true,logLevel: "info", clientScripts: ['jquery.js'], pageSettings: {
+	loadImages: false,
+	loadPlugins: false
+}});
 
 casper.userAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36;');
 
-var links = ['http://www.doctoralia.com.mx/medico/carmona+m+rene-12845929?viewPhone', 'http://www.doctoralia.com.mx/medico/marquez+tellez+iliana-14840839?viewPhone'];
-links = JSON.parse( fs.read('doctors_uri.json') );
+var links = JSON.parse( fs.read('doctors_za.json') );
+links = links.slice(0,2000);
 
 var doctors = [];
 
@@ -13,7 +16,7 @@ casper.start().each(links, function(self, link){
 
 	var doctor = {};
 
-	self.thenOpen(link);
+	self.thenOpen(link + '?viewPhone');
 
 	self.then(function(){
 		console.log('fetchDoctorData');
@@ -34,7 +37,8 @@ casper.start().each(links, function(self, link){
 });
 
 casper.then(function(){
-	fs.write('doctors_data.json', JSON.stringify(doctors, null, 4), 'a');
+	console.log('doctor appended');
+	fs.write('doctors_data_za.json', JSON.stringify(doctors, null, 4), 'a');
 });
 
 function fetchDoctorData() {
