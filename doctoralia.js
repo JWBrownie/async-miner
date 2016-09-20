@@ -1,16 +1,13 @@
 var util = require('util');
 var fs = require('fs');
-var casper = require('casper').create();
-
-casper.verbose = true;
-casper.logLevel = "info";
-casper.clientScripts = ['jquery.js'];
-casper.pageSettings.loadImages = false;
-casper.pageSettings.loadPlugins = false;
+var casper = require('casper').create({verbose: true,logLevel: "info", clientScripts: ['jquery.js'], pageSettings: {
+	loadImages: false,
+	loadPlugins: false
+}});
 
 casper.options.retryTimeout = 5;
-casper.options.waitTimeout = 5;
-casper.options.stepTimeout = 5;
+//casper.options.waitTimeout = 5;
+//casper.options.stepTimeout = 5;
 
 casper.options.onResourceRequested = function(casper, requestData, request) {
 	var skip = [
@@ -41,7 +38,7 @@ casper.options.onResourceRequested = function(casper, requestData, request) {
 casper.userAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36;');
 
 var links = JSON.parse( fs.read('doctors_za.json') );
-links = links.slice(6000,8000);
+links = links.slice(8000,10000);
 
 var doctors = [];
 
