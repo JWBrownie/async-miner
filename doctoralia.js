@@ -38,7 +38,7 @@ casper.options.onResourceRequested = function(casper, requestData, request) {
 casper.userAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36;');
 
 var links = JSON.parse( fs.read('doctors_za.json') );
-links = links.slice(8000,10000);
+links = links.slice(38000,38100);
 
 var doctors = [];
 
@@ -68,7 +68,7 @@ casper.start().each(links, function(self, link){
 
 casper.then(function(){
 	console.log('doctor appended');
-	fs.write('doctors_data_za.json', JSON.stringify(doctors, null, 4), 'a');
+	fs.write('doctors_az_full.json', JSON.stringify(doctors, null, 4), 'a');
 });
 
 function fetchDoctorData() {
@@ -97,13 +97,18 @@ function fetchDoctorReviews() {
 		items: [],
 	};
 
-	$('.review-item').each(function(index, element){
+	$('.review-item').each(function(index, element)
+	{
+		var goodInput = $(element).children('.review').children('.good').children('p').text().match(/"(.*?)"/);
+		var badInput = $(element).children('.review').children('.bad').children('p').text().match(/"(.*?)"/);
+		var motiveInput = $(element).find('.motive').text().match(/[^:]*$/);
+
 		var review = {
-			good: $('.good p').text().match(/"(.*?)"/)[1],
-			bad: $('.bad p').text().match(/"(.*?)"/)[1],
-			motive: $('.motive').text().match(/[^:]*$/)[0].trim(),
-			where: $('.review-item:first .reviewer .where').text().trim(),
-			how: $('.review-item:first .reviewer .how').text().trim()
+			good: goodInput !== null ? goodInput[1] : '',
+			bad: badInput !== null ? badInput[1] : '',
+			motive: motiveInput !== null ? motiveInput[0].trim() : '',
+			where: $(element).find('.reviewer .where').text().trim(),
+			how: $(element).find('.reviewer .how').text().trim()
 		};
 		reviews.items.push(review);
 	});
