@@ -81,6 +81,7 @@ function fetchDoctorData() {
 	doctor.building = $('#main > div > section.box.booking > div.booking-filter.no-bullet > form > div').text();
 	doctor.address = $('.booking form span.doctorplacesaddress label a.more').data('full-address');
 	doctor.phones = [];
+	doctor.uri = document.URL;
 	$('li.phone').each(function(){
 		doctor.phones.push( $(this).text().trim() );
 	});
