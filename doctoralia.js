@@ -1,7 +1,7 @@
 var util = require('util');
 var fs = require('fs');
 var casper = require('casper').create({verbose: true,logLevel: "info", clientScripts: ['jquery.js'], pageSettings: {
-	loadImages: false,
+	loadImages: true,
 	loadPlugins: false
 }});
 
@@ -29,7 +29,7 @@ casper.options.onResourceRequested = function(casper, requestData, request) {
 
 	skip.forEach(function(needle){
 		if(requestData.url.indexOf(needle) > 0) {
-			console.log('matched aborting::' + needle);
+			//console.log('matched aborting::' + needle);
 			request.abort();
 		}
 	});
@@ -37,8 +37,8 @@ casper.options.onResourceRequested = function(casper, requestData, request) {
 
 casper.userAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36;');
 
-var links = JSON.parse( fs.read('doctors_za.json') );
-links = links.slice(38000,38100);
+var links = JSON.parse( fs.read('doctors_az_no_duplicates.json') );
+links = links.slice(0,5000);
 
 var doctors = [];
 
@@ -49,15 +49,15 @@ casper.start().each(links, function(self, link){
 	self.thenOpen(link + '?viewPhone');
 
 	self.then(function(){
-		console.log('fetchDoctorData');
+		//console.log('fetchDoctorData');
 		doctor.data = this.evaluate(fetchDoctorData);
-		console.log('fetchDoctorData finished');
+		//console.log('fetchDoctorData finished');
 	});
 
 	self.thenOpen(link + '/opiniones', function() {
-		console.log('fetchDoctorReviews');
+		//console.log('fetchDoctorReviews');
 		doctor.reviews = this.evaluate(fetchDoctorReviews);
-		console.log('fetchDoctorReviews finished');
+		//console.log('fetchDoctorReviews finished');
 	});
 
 	self.then(function(){
@@ -67,12 +67,12 @@ casper.start().each(links, function(self, link){
 });
 
 casper.then(function(){
-	console.log('doctor appended');
-	fs.write('doctors_az_full.json', JSON.stringify(doctors, null, 4), 'a');
+	//console.log('doctor appended');
+	fs.write('doctors_az_full_no_duplicates_fix.json', JSON.stringify(doctors, null, 4), 'a');
 });
 
 function fetchDoctorData() {
-	console.log('inside fetchDoctorData');
+	//console.log('inside fetchDoctorData');
 	var doctor = {};
 	doctor.fullname = $('div.title h1').text();
 	doctor.profession = $('div.title #doctorSpecialities p').first().text();
@@ -85,7 +85,7 @@ function fetchDoctorData() {
 	$('li.phone').each(function(){
 		doctor.phones.push( $(this).text().trim() );
 	});
-	console.log('just before returning from fetchDoctorData');
+	//console.log('just before returning from fetchDoctorData');
 	return doctor;
 }
 
@@ -102,11 +102,13 @@ function fetchDoctorReviews() {
 	{
 		var goodInput = $(element).children('.review').children('.good').children('p').text().match(/"(.*?)"/);
 		var badInput = $(element).children('.review').children('.bad').children('p').text().match(/"(.*?)"/);
+		var generalInput = $(element).children('.review').children('.general').children('p').text().match(/"(.*?)"/);
 		var motiveInput = $(element).find('.motive').text().match(/[^:]*$/);
 
 		var review = {
 			good: goodInput !== null ? goodInput[1] : '',
 			bad: badInput !== null ? badInput[1] : '',
+			general: generalInput !== null ? generalInput[1] : '',
 			motive: motiveInput !== null ? motiveInput[0].trim() : '',
 			where: $(element).find('.reviewer .where').text().trim(),
 			how: $(element).find('.reviewer .how').text().trim()
