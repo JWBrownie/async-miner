@@ -38,7 +38,7 @@ casper.options.onResourceRequested = function(casper, requestData, request) {
 casper.userAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36;');
 
 var links = JSON.parse( fs.read('doctors_az_no_duplicates.json') );
-links = links.slice(0,5000);
+links = links.slice(50000,57048);
 
 var doctors = [];
 
@@ -68,7 +68,7 @@ casper.start().each(links, function(self, link){
 
 casper.then(function(){
 	//console.log('doctor appended');
-	fs.write('doctors_az_full_no_duplicates_fix.json', JSON.stringify(doctors, null, 4), 'a');
+	fs.write('doctors_az_full_with_education.json', JSON.stringify(doctors, null, 4), 'a');
 });
 
 function fetchDoctorData() {
@@ -81,10 +81,22 @@ function fetchDoctorData() {
 	doctor.building = $('#main > div > section.box.booking > div.booking-filter.no-bullet > form > div').text();
 	doctor.address = $('.booking form span.doctorplacesaddress label a.more').data('full-address');
 	doctor.phones = [];
-	doctor.uri = document.URL;
-	$('li.phone').each(function(){
-		doctor.phones.push( $(this).text().trim() );
-	});
+	doctor.education = [];
+    	doctor.uri = document.URL;
+    	$('li.phone').each(function(){
+    		doctor.phones.push( $(this).text().trim() );
+    	});
+
+    	$('.education ul li').each(function(){
+    		var li = $(this);
+    		var educationData = li[0].firstChild.textContent;
+
+    		li.children().each(function(){
+                educationData = educationData.concat(" " + $(this).text());
+    		});
+
+    		doctor.education.push(educationData);
+    	});
 	//console.log('just before returning from fetchDoctorData');
 	return doctor;
 }
