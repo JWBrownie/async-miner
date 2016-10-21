@@ -38,7 +38,7 @@ casper.options.onResourceRequested = function(casper, requestData, request) {
 casper.userAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36;');
 
 var links = JSON.parse( fs.read('doctors_az_no_duplicates.json') );
-links = links.slice(50000,57048);
+links = links.slice(0,57048);
 
 var doctors = [];
 
@@ -74,19 +74,23 @@ casper.then(function(){
 function fetchDoctorData() {
 	//console.log('inside fetchDoctorData');
 	var doctor = {};
+	doctor.url_image = $('.photo').first().find('img').attr('src');
 	doctor.fullname = $('div.title h1').text();
 	doctor.profession = $('div.title #doctorSpecialities p').first().text();
 	doctor.specialties = $('div.title #doctorSpecialities p.subspecialities').text();
 	doctor.cedula = $('div.header-content p.regnum').text();
 	doctor.building = $('#main > div > section.box.booking > div.booking-filter.no-bullet > form > div').text();
-	doctor.address = $('.booking form span.doctorplacesaddress label a.more').data('full-address');
+	doctor.address = [];
+	//doctor.address = $('.booking form span.doctorplacesaddress label a.more').data('full-address');
 	doctor.phones = [];
+	doctor.language = [];
+	doctor.expertise = [];
 	doctor.education = [];
+	doctor.service = [];
     	doctor.uri = document.URL;
     	$('li.phone').each(function(){
     		doctor.phones.push( $(this).text().trim() );
     	});
-
     	$('.education ul li').each(function(){
     		var li = $(this);
     		var educationData = li[0].firstChild.textContent;
@@ -97,6 +101,30 @@ function fetchDoctorData() {
 
     		doctor.education.push(educationData);
     	});
+
+        $(".address").each(function(){
+             var element = $(this);
+             doctor.address.push((element.children(".street").text()).concat(element.children(".location").first().text().split('\n')[1].trim()));
+        });
+
+    	$('section.expertise').children('ul').children().each(function(){
+            	    var expertise = {};
+            	    var expert = $(this);
+            	     expertise.type = expert.find("h4").text();
+                     expertise.list = [];
+                        expert.find('.blt').children().each(function(){
+                               expertise.list.push($(this).text());
+                        });
+                    doctor.expertise.push(expertise);
+            	});
+
+        $('.languages').children('ul').children().each(function(){
+                        doctor.languages.push(($(this).text())
+                         });
+        $('#servicesList').find('.name').each( function() {
+                       doctor.service.push($(this).text())
+                         });
+        }
 	//console.log('just before returning from fetchDoctorData');
 	return doctor;
 }
