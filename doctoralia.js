@@ -37,7 +37,7 @@ casper.options.onResourceRequested = function(casper, requestData, request) {
 
 casper.userAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36;');
 
-var links = JSON.parse( fs.read('doctors_az_no_duplicates.json') );
+var links = JSON.parse( fs.read('doctors_za.json') );
 links = links.slice(0,5000);
 
 var doctors = [];
@@ -67,8 +67,7 @@ casper.start().each(links, function(self, link){
 });
 
 casper.then(function(){
-	//console.log('doctor appended');
-	fs.write('doctors_az_full_no_duplicates_fix.json', JSON.stringify(doctors, null, 4), 'a');
+	fs.write('doctors_full_data.json', JSON.stringify(doctors, null, 4), 'a');
 });
 
 function fetchDoctorData() {
@@ -100,16 +99,16 @@ function fetchDoctorReviews() {
 
 	$('.review-item').each(function(index, element)
 	{
-		var goodInput = $(element).children('.review').children('.good').children('p').text().match(/"(.*?)"/);
-		var badInput = $(element).children('.review').children('.bad').children('p').text().match(/"(.*?)"/);
-		var generalInput = $(element).children('.review').children('.general').children('p').text().match(/"(.*?)"/);
-		var motiveInput = $(element).find('.motive').text().match(/[^:]*$/);
+		var goodInput = $(element).children('.review').children('.good').children('p').text();
+		var badInput = $(element).children('.review').children('.bad').children('p').text();
+		var generalInput = $(element).children('.review').children('.general').children('p');
+		var motiveInput = $(element).find('.motive').text();
 
 		var review = {
-			good: goodInput !== null ? goodInput[1] : '',
-			bad: badInput !== null ? badInput[1] : '',
-			general: generalInput !== null ? generalInput[1] : '',
-			motive: motiveInput !== null ? motiveInput[0].trim() : '',
+			good: goodInput !== null ? goodInput : '',
+			bad: badInput !== null ? badInput : '',
+			general: generalInput !== null ? generalInput : '',
+			motive: motiveInput !== null ? motiveInput : '',
 			where: $(element).find('.reviewer .where').text().trim(),
 			how: $(element).find('.reviewer .how').text().trim()
 		};
